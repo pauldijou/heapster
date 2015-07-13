@@ -5,12 +5,12 @@ const comparator = function (a, b) {
 };
 
 // O(log(n))
-function siftUp(arr, pos, comp) {
+function siftUp(arr, comp, pos) {
   // console.log('-------------- up -------------');
   // console.log('idx', pos, ':', arr[pos], arr);
   const elem = arr[pos];
   while(pos > 0) {
-    let parent = (pos - 1) >> 1;
+    const parent = (pos - 1) >> 1;
     // console.log('parent', parent, ':', arr[parent], comp(elem, arr[parent]));
     if (pos > 0 && comp(elem, arr[parent]) > 0) {
       arr[pos] = arr[parent];
@@ -24,7 +24,10 @@ function siftUp(arr, pos, comp) {
 }
 
 // O(log(n))
-function siftDown(arr, pos, end, comp) {
+function siftDown(arr, comp, pos, end) {
+  if (isNaN(end)) {
+    end = arr.length;
+  }
   // console.log('-----------------------');
   // console.log('idx', pos, ':', arr[pos],'end', end, 'arr', arr);
   let largest;
@@ -50,15 +53,15 @@ function siftDown(arr, pos, end, comp) {
     const tmp = arr[pos];
     arr[pos] = arr[largest];
     arr[largest] = tmp;
-    return siftDown(arr, largest, end, comp);
+    return siftDown(arr, comp, largest, end);
   }
 }
 
 export default class Heapster {
   constructor (...args) {
     if (typeof args[0] === 'function') {
-      this.elements = [];
       this.comparator = args[0];
+      this.elements = [];
     } else {
       // console.log('######################################################################');
       this.comparator = args[1] || comparator;
@@ -69,15 +72,16 @@ export default class Heapster {
 
   // O(n.log(n))
   static heapify(arr, comp = comparator) {
+    if (arr === undefined || arr === null) { return arr; }
     const size = arr.length;
     for (let i = (size - 1) >> 1; i >= 0; --i) {
-      siftDown(arr, i, size, comp);
+      siftDown(arr, comp, i);
     }
     return arr;
   }
 
   // O(n.log(n))
-  static heapSort(arr, comp = comparator) {
+  static sort(arr, comp = comparator) {
     return new Heapster(arr, comp).sort();
   }
 
@@ -94,13 +98,13 @@ export default class Heapster {
   // get: O(1)
   // set: O(log(n))
   root (elem) {
-    if (elem) {
+    if (elem !== undefined) {
       const first = this.root();
-      if (!first || this.comparator(elem, first) < 0) {
+      if (first === undefined || this.comparator(first, elem) < 0) {
         return elem;
       } else {
         this.elements[0] = elem;
-        siftDown(this.elements, 0, this.size(), this.comparator);
+        siftDown(this.elements, this.comparator, 0);
         return first;
       }
     }
@@ -108,58 +112,81 @@ export default class Heapster {
     return this.elements[0];
   }
 
+  // O(log(n)) for each element
+  push (...elems) {
+    for (let elem of elems) {
+      this.elements.push(elem);
+      siftUp(this.elements, this.comparator, this.size() - 1);
+    }
+    return this.size();
+  }
+
   // O(log(n))
-  push (elem) {
-    this.elements.push(elem);
-    siftUp(this.elements, this.size() - 1, this.comparator);
+  add (elem) {
+    this.push(elem);
     return this;
   }
 
   // O(log(n))
   pop () {
-    let result = this.elements.pop();
-    if (!this.isEmpty()) {
-      result = this.root(result);
-    }
-    return result;
+    return this.root(this.elements.pop());
   }
 
   // O(1)
-  copy () {
+  clone () {
     const result = new Heapster(this.comparator);
     result.elements = this.elements.slice(0);
     return result;
   }
 
+  // O(n)
+  has (elem) {
+    return this.elements.indexOf(elem) > -1;
+  }
+
   // O(n.log(n))
   update (elem) {
-    if (isNaN(elem)) {
-      elem = this.elements.indexOf(elem);
+    return this.updateAt(this.elements.indexOf(elem), elem);
+  }
+
+  // O(log(n))
+  updateAt (index, value) {
+    if (index > -1 && index < this.size()) {
+      this.elements[index] = value;
+      siftUp(this.elements, this.comparator, index);
+      siftDown(this.elements, this.comparator, index);
     }
-
-    if (elem > -1) {
-
-    }
-
+    return this;
   }
 
   // O(n.log(n))
-  delete (eleme) {
-    if (isNaN(elem)) {
-      elem = this.elements.indexOf(elem);
-    }
-
-    if (elem > -1) {
-
-    }
+  delete (elem) {
+    return this.deleteAt(this.elements.indexOf(elem));
   }
 
-  merge () {
-
+  // O(log(n))
+  deleteAt (index) {
+    if (index > -1 && index < this.size()) {
+      if (index === this.size() - 1) {
+        this.elements.pop();
+      } else {
+        this.elements[index] = this.elements.pop();
+        siftDown(this.elements, this.comporator, index);
+      }
+      return true;
+    }
+    return false;
   }
 
-  meld () {
+  merge (heap) {
+    const result = this.clone();
+    result.push.apply(result, heap.elements);
+    return result;
+  }
 
+  meld (heap) {
+    this.push.apply(this, heap.elements);
+    return this;
   }
 
   // O(n.log(n))
@@ -169,12 +196,12 @@ export default class Heapster {
       const tmp = result[0];
       result[0] = result[i];
       result[i] = tmp;
-      siftDown(result, 0, i - 1, this.comparator);
+      siftDown(result, this.comparator, 0, i - 1);
     }
     return result;
   }
 
   toArray () {
-    return this.elements;
+    return this.elements.slice(0);
   }
 }
