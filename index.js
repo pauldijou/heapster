@@ -4,11 +4,15 @@ const comparator = function (a, b) {
   return 0;
 };
 
+// O(log(n))
 function siftUp(arr, pos, comp) {
+  // console.log('-------------- up -------------');
+  // console.log('idx', pos, ':', arr[pos], arr);
   const elem = arr[pos];
   while(pos > 0) {
-    let parent = (pos - 1) >> 2;
-    if (comp(elem, arr[parent]) < 0) {
+    let parent = (pos - 1) >> 1;
+    // console.log('parent', parent, ':', arr[parent], comp(elem, arr[parent]));
+    if (pos > 0 && comp(elem, arr[parent]) > 0) {
       arr[pos] = arr[parent];
       pos = parent;
     } else {
@@ -19,9 +23,10 @@ function siftUp(arr, pos, comp) {
   return arr;
 }
 
+// O(log(n))
 function siftDown(arr, pos, end, comp) {
   // console.log('-----------------------');
-  // console.log(pos, end, arr);
+  // console.log('idx', pos, ':', arr[pos],'end', end, 'arr', arr);
   let largest;
   const left = 2 * pos + 1,
         right = 2 * pos + 2;
@@ -31,8 +36,8 @@ function siftDown(arr, pos, end, comp) {
     largest = pos;
   }
 
-  // console.log('left', left, left < end, comp(arr[left], arr[pos]));
-  // console.log('right', right, right < end, comp(arr[right], arr[largest]));
+  // console.log('left', left, ':', arr[left], left < end, comp(arr[left], arr[pos]));
+  // console.log('right', right, ':', arr[right], right < end, comp(arr[right], arr[largest]));
   if (right < end && comp(arr[right], arr[largest]) > 0) {
     largest = right;
   }
@@ -55,11 +60,14 @@ export default class Heapster {
       this.elements = [];
       this.comparator = args[0];
     } else {
-      this.elements = Heapster.heapify(args[0] || []);
+      // console.log('######################################################################');
       this.comparator = args[1] || comparator;
+      // Clone the array to prevent side effects since we are mutating it in place
+      this.elements = Heapster.heapify((args[0] || []).slice(0), this.comparator);
     }
   }
 
+  // O(n.log(n))
   static heapify(arr, comp = comparator) {
     const size = arr.length;
     for (let i = (size - 1) >> 1; i >= 0; --i) {
@@ -68,18 +76,23 @@ export default class Heapster {
     return arr;
   }
 
+  // O(n.log(n))
   static heapSort(arr, comp = comparator) {
     return new Heapster(arr, comp).sort();
   }
 
+  // O(1)
   size () {
     return this.elements.length;
   }
 
+  // O(1)
   isEmpty () {
     return this.size() === 0;
   }
 
+  // get: O(1)
+  // set: O(log(n))
   root (elem) {
     if (elem) {
       const first = this.root();
@@ -95,12 +108,14 @@ export default class Heapster {
     return this.elements[0];
   }
 
+  // O(log(n))
   push (elem) {
     this.elements.push(elem);
-    siftUp(this.elements, this.size(), this.comparator);
+    siftUp(this.elements, this.size() - 1, this.comparator);
     return this;
   }
 
+  // O(log(n))
   pop () {
     let result = this.elements.pop();
     if (!this.isEmpty()) {
@@ -109,12 +124,14 @@ export default class Heapster {
     return result;
   }
 
+  // O(1)
   copy () {
     const result = new Heapster(this.comparator);
     result.elements = this.elements.slice(0);
     return result;
   }
 
+  // O(n.log(n))
   update (elem) {
     if (isNaN(elem)) {
       elem = this.elements.indexOf(elem);
@@ -126,8 +143,15 @@ export default class Heapster {
 
   }
 
-  delete (element) {
+  // O(n.log(n))
+  delete (eleme) {
+    if (isNaN(elem)) {
+      elem = this.elements.indexOf(elem);
+    }
 
+    if (elem > -1) {
+
+    }
   }
 
   merge () {
@@ -138,6 +162,7 @@ export default class Heapster {
 
   }
 
+  // O(n.log(n))
   sort () {
     const result = this.elements.slice(0);
     for(let i = result.length; i > 0; --i) {
