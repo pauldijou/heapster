@@ -6,12 +6,9 @@ const comparator = function (a, b) {
 
 // O(log(n))
 function siftUp(arr, comp, pos) {
-  // console.log('-------------- up -------------');
-  // console.log('idx', pos, ':', arr[pos], arr);
   const elem = arr[pos];
   while(pos > 0) {
     const parent = (pos - 1) >> 1;
-    // console.log('parent', parent, ':', arr[parent], comp(elem, arr[parent]));
     if (pos > 0 && comp(elem, arr[parent]) > 0) {
       arr[pos] = arr[parent];
       pos = parent;
@@ -28,8 +25,6 @@ function siftDown(arr, comp, pos, end) {
   if (isNaN(end)) {
     end = arr.length;
   }
-  // console.log('-----------------------');
-  // console.log('idx', pos, ':', arr[pos],'end', end, 'arr', arr);
   let largest;
   const left = 2 * pos + 1,
         right = 2 * pos + 2;
@@ -39,15 +34,11 @@ function siftDown(arr, comp, pos, end) {
     largest = pos;
   }
 
-  // console.log('left', left, ':', arr[left], left < end, comp(arr[left], arr[pos]));
-  // console.log('right', right, ':', arr[right], right < end, comp(arr[right], arr[largest]));
   if (right < end && comp(arr[right], arr[largest]) > 0) {
     largest = right;
   }
 
-  // console.log('largest', largest);
   if (largest === pos) {
-    // console.log('done', largest, arr);
     return arr;
   } else {
     const tmp = arr[pos];
@@ -63,7 +54,6 @@ export default class Heapster {
       this.comparator = args[0];
       this.elements = [];
     } else {
-      // console.log('######################################################################');
       this.comparator = args[1] || comparator;
       // Clone the array to prevent side effects since we are mutating it in place
       this.elements = Heapster.heapify((args[0] || []).slice(0), this.comparator);
@@ -160,18 +150,18 @@ export default class Heapster {
   }
 
   // O(n.log(n))
-  delete (elem) {
-    return this.deleteAt(this.elements.indexOf(elem));
+  remove (elem) {
+    return this.removeAt(this.elements.indexOf(elem));
   }
 
   // O(log(n))
-  deleteAt (index) {
+  removeAt (index) {
     if (index > -1 && index < this.size()) {
       if (index === this.size() - 1) {
         this.elements.pop();
       } else {
         this.elements[index] = this.elements.pop();
-        siftDown(this.elements, this.comporator, index);
+        siftDown(this.elements, this.comparator, index);
       }
       return true;
     }
@@ -192,11 +182,11 @@ export default class Heapster {
   // O(n.log(n))
   sort () {
     const result = this.elements.slice(0);
-    for(let i = result.length; i > 0; --i) {
+    for(let i = result.length - 1; i > 0; --i) {
       const tmp = result[0];
       result[0] = result[i];
       result[i] = tmp;
-      siftDown(result, this.comparator, 0, i - 1);
+      siftDown(result, this.comparator, 0, i);
     }
     return result;
   }

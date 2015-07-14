@@ -1,7 +1,7 @@
 {
   "name": "heapster",
   "version": "0.1.0",
-  "description": "Heap data structure so hype it's using ES 2015",
+  "description": "Heap data structure so hype it's using ES 2015. Gluten and dependency free.",
   "devDependencies": {
     "babel-loader": "^5.3.1",
     "jasmine": "^2.3.0",

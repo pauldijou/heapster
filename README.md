@@ -19,27 +19,24 @@ import Heapster from 'heapster';
 
 // Default is an empty max-heap
 const maxHeap = new Heapster();
-maxHeap.push(1, 4, 5, 6);
-console.log(maxHeap.root()); // 6
-console.log(maxHeap.size()); // 4
-console.log(maxHeap.pop()); // 6
+maxHeap.push(1, 9, 3, -1, 5, 0);
+console.log(maxHeap.root()); // 9
+console.log(maxHeap.size()); // 6
+console.log(maxHeap.pop()); // 9
 console.log(maxHeap.root()); // 5
+console.log(maxHeap.sort()); // [-1, 0, 1, 3, 5]
 
 // Init a non-empty min-heap
 const minHeap = new Heapster([-2, 4, 3], (a,b) => b - a);
 console.log(minHeap.root()); // -2
 console.log(minHeap.pop()); // -2
 console.log(minHeap.root()); // 3
-minHeap.push(3, 2, 1, 7);
-console.log(minHeap.sort()); // [1, 2, 3, 3, 4, 7]
 
 // Static heap sort
-// Default to max-heap => from max to min
-console.log(Heapster.sort([4, -1, 5, 2])); // [5, 4, 2, -1]
-// You can reverse to have from min to max
-console.log(Heapster.sort([4, -1, 5, 2]).reverse()); // [-1, 2, 4, 5]
+// Default to max-heap => from min to max
+console.log(Heapster.sort([4, -1, 5, 2])); // [-1, 2, 4, 5]
 // Or use a custom comparator function
-console.log(Heapster.sort([4, -1, 5, 2]), (a,b) => b - a); // [-1, 2, 4, 5]
+console.log(Heapster.sort([4, -1, 5, 2], (a,b) => b - a)); // [5, 4, 2, -1]
 ```
 
 ## Pro-tip
@@ -56,7 +53,7 @@ const heap = new Heap();
 
 ### constructor([elements: Array], [comparator: Function]): Heapster
 
-Create a new heap.
+**O(n.log(n))** Create a new heap.
 
 ```javascript
 // Empty max-heap with default comparator
@@ -71,7 +68,7 @@ new Heapster([{rank: 1, rank: 3}], (a,b) => b.rank - a.rank);
 
 ### size(): Number
 
-Return the size of the heap.
+**O(1)** Return the size of the heap.
 
 ```javascript
 new Heapster([1, 2, 3]).size(); // 3
@@ -79,7 +76,7 @@ new Heapster([1, 2, 3]).size(); // 3
 
 ### isEmpty(): Boolean
 
-Test if the heap is empty or not.
+**O(1)** Test if the heap is empty or not.
 
 ```javascript
 new Heapster().isEmpty(); // true
@@ -88,7 +85,7 @@ new Heapster([1]).isEmpty(); // false
 
 ### push(...elements: Any): Number
 
-Push one or more elements to the heap and return its new size.
+**O(log(n)) for each element** Push one or more elements to the heap and return its new size.
 
 ```javascript
 new Heapster().push(5); // 1, heap is [5]
@@ -97,7 +94,7 @@ new Heapster().push(1, 5, 7); // 3, heap is [7, 1, 5]
 
 ### pop(): Any
 
-Remove the root of the heap and return it.
+**O(log(n))** Remove the root of the heap and return it.
 
 ```javascript
 new Heapster().pop(); // undefined, heap is []
@@ -106,7 +103,7 @@ new Heapster([4, 2, 10]).pop(); // 10, heap is [4, 2]
 
 ### add(element: Any): Heapster
 
-Just like push but accept only one element at a time and return the heap itself to do chaining.
+**O(log(n))** Just like push but accept only one element at a time and return the heap itself to do chaining.
 
 ```javascript
 new Heapster().add(1).add(5).add(3); // heap is [5, 1, 3]
@@ -114,7 +111,7 @@ new Heapster().add(1).add(5).add(3); // heap is [5, 1, 3]
 
 ### root([element: Any]): Any
 
-If not argument, return the root of the heap as a normal getter. If one argument, it will try to set the root of the heap with the argument and return the deleted heap. It's like doing a push() and a pop() at the same time with some optimizations. If the argument is greater than the current root (according to the heap comparator), it will return the argument and do nothing.
+**O(1) or O(log(n))** If no argument, return the root of the heap as a normal getter. If one argument, it will try to set the root of the heap with the argument and return the deleted root. It's like doing a push() and a pop() at the same time with some optimizations. If the argument is greater than the current root (according to the heap comparator), it will return the argument and do nothing.
 
 ```javascript
 // Getter
@@ -128,7 +125,7 @@ heap.root(10); // return 10, the heap is still [3, 2, 1]
 
 ### has(element: Any): Boolean
 
-Return true if the heap contains the element, false is not.
+**O(n)** Return true if the heap contains the element, false is not.
 
 ```javascript
 const element = {rank: 4};
@@ -140,68 +137,83 @@ heap.has(element); // true
 
 ### update(element: Any): Heapster
 
-Call this method if you edited an element and it might change its place in the heap.
+**O(n.log(n))** Call this method if you edited an element and it might change its place in the heap.
 
 ```javascript
 const elements = [{rank: 4}, {rank: 1}, {rank: 2}, {rank: 6}, {rank: 8}];
 const heap = new Heapster(elements, (a,b) => b.rank - a.rank);
-console.log(heap.root()); // {rank: 1}
+heap.root(); // {rank: 1}
 elements[1].rank = 5;
 // Right now, the heap is not longer valid, don't do any operation on it before calling the next line:
 heap.update(elements[1]);
 // Heap is valid again
-console.log(heap.root()); // {rank: 2}
+heap.root(); // {rank: 2}
 ```
 
-### delete(element: Any): Boolean
+### remove(element: Any): Boolean
 
-Try to delete an element of the heap. Return true if it did delete something and false if not.
+**O(n.log(n))** Try to remove an element of the heap. Return true if it did remove something and false if not.
 
 ```javascript
 const heap = new Heapster([1, 2, 2, 3, 4]);
-heap.delete(3); // true
-heap.delete(5); // false
-heap.delete(2); // true
-heap.delete(2); // true
-heap.delete(2); // false
+heap.remove(3); // true
+heap.remove(5); // false
+heap.remove(2); // true
+heap.remove(2); // true
+heap.remove(2); // false
 ```
 
 ### sort(): Array
 
-Sort the elements of the heap according to its comparator and return the resulting array.
+**O(n.log(n))** Sort the elements of the heap according to its comparator and return the resulting array.
 
 ```javascript
 // Max-heap
-new Heapster([4, 1, 5, 3]).sort(); // [5, 4, 3, 1]
+new Heapster([4, 1, 5, 3]).sort(); // [1, 3, 4, 5]
 // Min-heap
-new Heapster([4, 1, 5, 3], (a,b) => b - a).sort(); // [1, 3, 4, 5]
+new Heapster([4, 1, 5, 3], (a,b) => b - a).sort(); // [5, 4, 3, 1]
 ```
 
 ### merge(heap: Heapster): Heapster
 
-Merge the current heap with another one and create a new resulting heap.
+**O(m.log(n))** Merge the current heap with another one and create a new resulting heap.
 
 ```javascript
 const heap1 = new Heapster([2, 3, 4]);
 const heap2 = new Heapster([1, 5, 2]);
-const heap3 = heap1.merge(heap2); // [5, 3, 4, 2, 1, 2]
+const heap3 = heap1.merge(heap2); // [5, 4, 2, 3, 1, 2]
 console.log(heap3 === heap1); // false
 ```
 
-### meld(heap: Heapster): Heaspter
+### meld(heap: Heapster): Heapster
 
-Merge another heap inside the current one.
+**O(m.log(n))** Merge another heap inside the current one.
 
 ```javascript
 const heap1 = new Heapster([2, 3, 4]);
 const heap2 = new Heapster([1, 5, 2]);
-const heap3 = heap1.merge(heap2); // [5, 3, 4, 2, 1, 2]
+const heap3 = heap1.meld(heap2); // [5, 4, 2, 3, 1, 2]
 console.log(heap3 === heap1); // true
+```
+
+### clone(): Heapster
+
+**O(1)** Clone the heap into a new identical one.
+
+```javascript
+const heap1 = new Heapster([1, 2, 3, 4]);
+const heap2 = heap1.clone();
+console.log(heap1 === heap2); // false
+console.log(heap1.elements === heap2.elements); // false
+console.log(heap1.size() === heap2.size()); // true
+for (let i = 0, l = heap1.size(); i < l; ++i) {
+  console.log(heap1[i] === heap2[i]); // true
+}
 ```
 
 ### toArray(): Array
 
-Return a copy of the elements of the heap as an array.
+**O(1)** Return a copy of the elements of the heap as an array.
 
 ```javascript
 const heap = new Heapster([3, 6, 1, 2]);
@@ -212,6 +224,22 @@ console.log(arr[0]); // 6, the root of the heap
 console.log(arr); // Might be [6, 3, 1, 2]
 ```
 
+### static heapify(elements: Array, [comparator: Function]): Array
+
+**O(n.log(n))** Transform in place an array to the representation of a heap. See [the `elements` property](#elements) below.
+
+```javascript
+Heapster.heapify([5, 3, 7, 1, 2, 10, 8]); // Might be [10, 3, 8, 1, 2, 7, 5]
+```
+
+### static sort(elements: Array, [comparator: Function]): Array
+
+**O(n.log(n))** Perform an heap sort on the elements of the array. It's just the same as creating a new heap from the elements and calling `.sort()` on it.
+
+```javascript
+Heapster.sort([5, 3, 7, 1, 2, 10, 8]); // [1, 2, 3, 5, 7, 8, 10]
+```
+
 ## Properties
 
 ### elements
@@ -220,7 +248,7 @@ The array containing all the elements of the heap. The first element is the root
 
 ```javascript
 const heap = new Heapster([5, 3, 7, 1, 2, 10, 8]);
-console.log(heap.elements); // Might be [10, 7, 8, 5, 3, 1, 2]
+console.log(heap.elements); // Might be [10, 3, 8, 1, 2, 7, 5]
 ```
 
 ### comparator
