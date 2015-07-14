@@ -1,7 +1,25 @@
 {
   "name": "heapster",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "license": "Apache-2.0",
   "description": "Heap data structure so hype it's using ES 2015. Gluten and dependency free.",
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/pauldijou/heapster.git"
+  },
+  "homepage": "https://github.com/pauldijou/heapster",
+  "bugs": {
+    "email": "paul.dijou@gmail.com",
+    "url": "https://github.com/pauldijou/heapster/issues"
+  },
+  "author": {
+    "email": "paul.dijou@gmail.com",
+    "name": "Paul Dijou",
+    "url": "http://pauldijou.fr"
+  },
+  "keywords": [
+    "heap"
+  ],
   "devDependencies": {
     "babel-loader": "^5.3.1",
     "jasmine": "^2.3.0",
