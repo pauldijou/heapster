@@ -1,7 +1,7 @@
 {
   "name": "heapster",
   "main": "index.js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/pauldijou/heapster",
   "authors": [
     "Paul Dijou <paul.dijou@gmail.com>"
