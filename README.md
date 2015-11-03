@@ -51,7 +51,7 @@ const heap = new Heap();
 
 ## API
 
-### constructor([elements: Array], [comparator: Function]): Heapster
+### constructor([elements: Array], [comparator: Function], [options: Object]): Heapster
 
 **O(n.log(n))** Create a new heap.
 
@@ -65,6 +65,10 @@ new Heapster((a,b) => b - a);
 // Non-empty min-heap with custom comparator
 new Heapster([{rank: 1, rank: 3}], (a,b) => b.rank - a.rank);
 ```
+
+**Options**
+
+- indexed: Boolean = improve performance by tracking indexes. [Read more](#optimizations)
 
 ### size(): Number
 
@@ -135,9 +139,11 @@ heap.push(element);
 heap.has(element); // true
 ```
 
+Can be [optimized](#optimizations) to **O(1)**.
+
 ### update(element: Any): Heapster
 
-**O(n.log(n))** Call this method if you edited an element and it might change its place in the heap.
+**O(n)** Call this method if you edited an element and it might change its place in the heap.
 
 ```javascript
 const elements = [{rank: 4}, {rank: 1}, {rank: 2}, {rank: 6}, {rank: 8}];
@@ -150,9 +156,11 @@ heap.update(elements[1]);
 heap.root(); // {rank: 2}
 ```
 
+Can be [optimized](#optimizations) to **O(log(n))**.
+
 ### remove(element: Any): Boolean
 
-**O(n.log(n))** Try to remove an element of the heap. Return true if it did remove something and false if not.
+**O(n)** Try to remove an element of the heap. Return true if it did remove something and false if not.
 
 ```javascript
 const heap = new Heapster([1, 2, 2, 3, 4]);
@@ -162,6 +170,8 @@ heap.remove(2); // true
 heap.remove(2); // true
 heap.remove(2); // false
 ```
+
+Can be [optimized](#optimizations) to **O(log(n))**.
 
 ### sort(): Array
 
@@ -274,6 +284,26 @@ const minComparator = function (a, b) {
 const heap = new Heapster(minComparator);
 // Test the property, just for fun
 console.log(heap.comparator === minComparator); // true
+```
+
+## Optimizations
+
+One problem with using an array to store the heap is that everything is index based. It means that all methods which need to access a particular element (like `update`, `remove` and `has`) will need to first call `indexOf` on the array of elements to retrieve its index and then do the logic. It's counter-productive regarding the fact that all those methods are, at most, **O(log(n))** while `indexOf` is **O(n)**, destroying all performances.
+
+One way to solve that is to track the indexes of all elements while moving them inside the array. Some libs use a hashmap to link one element to its index but the final user will need to provide a hash function for the lib to know how to actually compute the hash. I decided to use another approach and store the index directly inside the element. It has some limitations too. In order to enable it, you need to specify `{ indexed: true }` in the options when creating the heap.
+
+First of all, it cannot work with primitives since you cannot store any new properties in them, so you will be forced to use objects. Most of the time, it's ok because you don't really need to call the previous methods on primitives. But if you really need to, just wrap your data inside objects: `{value: 'your primitive'}` and map them back to primitives when needed.
+
+Then, we need to avoid any collision with existing properties. It's done using [Symbol](https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Symbol) which assure that it cannot clash. You will need a polyfill for that in some browsers, Babel has one.
+
+And, obviously, it will dirty all your objects. You shouldn't be concerned about that, it's just a small number, but if it really bother you, you can clean it anytime. Be sure that the element is no longer inside the heap before cleaning it or the heap will implose and the universe collapse.
+
+```javascript
+const element = heap.pop();
+// Ask the heap to clean it
+heap.clean(element);
+// Or the static way
+Heapster.clean(element);
 ```
 
 ## License

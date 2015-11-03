@@ -1,8 +1,9 @@
 {
   "name": "heapster",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "license": "Apache-2.0",
   "description": "Heap data structure so hype it's using ES 2015. Gluten and dependency free.",
+  "main": "lib/index.js",
   "repository" : {
     "type" : "git",
     "url" : "https://github.com/pauldijou/heapster.git"
@@ -18,21 +19,28 @@
     "url": "http://pauldijou.fr"
   },
   "keywords": [
-    "heap"
+    "heap",
+    "hype"
   ],
   "devDependencies": {
+    "babel": "^5.8.0",
     "babel-loader": "^5.3.1",
     "jasmine": "^2.3.0",
     "karma": "^0.12.37",
     "karma-jasmine": "^0.3.6",
     "karma-chrome-launcher": "^0.2.0",
+    "karma-firefox-launcher": "^0.1.6",
     "karma-phantomjs-launcher": "^0.2.0",
     "karma-webpack": "^1.5.1",
     "phantomjs": "1.9.17",
     "webpack": "^1.10.1",
-    "node-libs-browser": ">= 0.4.0 <=0.6.0"
+    "node-libs-browser": ">= 0.4.0 <=0.6.0",
+    "text-table": "0.2.0"
   },
   "scripts": {
+    "clean": "rm -rf lib",
+    "build": "babel src --out-dir lib",
+    "prepublish": "npm run clean && npm run build",
     "test": "karma start"
   }
 }
