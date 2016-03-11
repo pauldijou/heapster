@@ -1,6 +1,6 @@
 {
   "name": "heapster",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "Apache-2.0",
   "description": "Heap data structure so hype it's using ES 2015. Gluten and dependency free.",
   "main": "lib/index.js",
